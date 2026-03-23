@@ -53,14 +53,16 @@ O mapa é construído dinamicamente a partir de arquivos de texto (`level1.txt`,
 #### Dicionário do Mapa (.txt)
 Cada letra no arquivo de texto é traduzida para um `CellValue` (Enum) no código:
 
-| Letra | Significado   | Descrição                                               |
-| **W** | Wall (Parede) | Obstáculo físico (azul). Destrutível com poder.         |
-| **S** | Small Dot     | Ponto pequeno. Vale 10 pontos.                          |
-| **B** | Big Dot       | Ponto grande. Vale 50 pontos e ativa o modo destruidor. |
-| **P** | Player        | Posição inicial do Ralph.                               |
-| **1** | Ghost 1       | Casa do fantasma 1.                                     |
-| **2** | Ghost 2       | Casa do fantasma 2.                                     |
-| **E** | Empty         | Espaço vazio.                                           |
+```
+| Letra | Significado       | Descrição                                               |
+| W     | Wall (Parede)     | Obstáculo físico (azul). Destrutível com poder.         |
+| S     | Small Dot         | Ponto pequeno. Vale 10 pontos.                          |
+| B     | Big Dot           | Ponto grande. Vale 50 pontos e ativa o modo destruidor. |
+| P     | Player            | Posição inicial do Ralph.                               |
+| 1     | Ghost 1           | Casa do fantasma 1.                                     |
+| 2     | Ghost 2           | Casa do fantasma 2.                                     |
+| E     | Empty             | Espaço vazio.                                           |
+```
 
 ```java
 // Exemplo no RalphManModel.java interpretando o arquivo de texto
