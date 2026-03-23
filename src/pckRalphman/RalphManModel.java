@@ -182,7 +182,6 @@ public class RalphManModel {
      */
     public void moveRalphman(Direction direction) {
         Point2D potentialRalphmanVelocity = changeVelocity(direction);
-        potentialRalphmanVelocity = potentialRalphmanVelocity.multiply(speedMultiplier);
         Point2D potentialRalphmanLocation = ralphmanLocation.add(potentialRalphmanVelocity);
         //se o RalphMan sair da tela, dê a volta
         potentialRalphmanLocation = setGoingOffscreenNewLocation(potentialRalphmanLocation);
@@ -191,10 +190,15 @@ public class RalphManModel {
         if (direction.equals(lastDirection)) {
             //se mover na mesma direção resultaria em bater em uma parede, pare de se mover ou destrua a parede se estiver no modo de comer fantasmas
             if (grid[(int) potentialRalphmanLocation.getX()][(int) potentialRalphmanLocation.getY()] == CellValue.WALL){
+
                 if (ghostEatingMode) {
+                    // SEMPRE quebra a parede
                     grid[(int) potentialRalphmanLocation.getX()][(int) potentialRalphmanLocation.getY()] = CellValue.EMPTY;
+
                     ralphmanVelocity = potentialRalphmanVelocity;
                     ralphmanLocation = potentialRalphmanLocation;
+                    setLastDirection(direction); // 🔥 IMPORTANTE
+
                 } else {
                     ralphmanVelocity = changeVelocity(Direction.NONE);
                     setLastDirection(Direction.NONE);
@@ -468,8 +472,12 @@ public class RalphManModel {
             grid[(int) ralphmanLocation.getX()][(int) ralphmanLocation.getY()] = CellValue.EMPTY;
             dotCount--;
             score += 50;
+
             ghostEatingMode = true;
             this.speedMultiplier = 1.25;
+
+            justAteBigDot = true; // ✅ ESSENCIAL
+
             Controller.setGhostEatingModeCounter();
         }
         //envie o fantasma de volta para a casa do fantasma se o RalphMan estiver em um fantasma no modo de comer fantasmas

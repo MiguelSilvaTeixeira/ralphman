@@ -14,7 +14,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Controller implements EventHandler<KeyEvent> {
-    final private static double FRAMES_PER_SECOND = 5.0;
+    final private static double FRAMES_PER_SECOND = 60.0;
+    private int contadorFrames = 0;
+    private static final int FRAMES_POR_MOVIMENTO = 12;
 
     @FXML private Label scoreLabel;
     @FXML private Label levelLabel;
@@ -67,7 +69,19 @@ public class Controller implements EventHandler<KeyEvent> {
      */
     private void update(RalphManModel.Direction direction) {
         if (!paused) {
-            this.ralphManModel.step(direction);
+            contadorFrames++;
+
+            if (contadorFrames >= FRAMES_POR_MOVIMENTO) {
+
+                this.ralphManModel.step(direction);
+
+                // ✅ mover o contador pra cá
+                if (ralphManModel.isGhostEatingMode()) {
+                    ghostEatingModeCounter--;
+                }
+
+                contadorFrames = 0;
+            }
         }
         this.ralphManView.update(ralphManModel);
         this.scoreLabel.setText(String.format("Score: %d", this.ralphManModel.getScore()));
@@ -83,10 +97,6 @@ public class Controller implements EventHandler<KeyEvent> {
         if (ralphManModel.isYouWon()) {
             this.gameOverLabel.setText(String.format("YOU WON!"));
             this.gameOverLabel.setStyle("-fx-font-size: 150%; -fx-text-fill: white");
-        }
-        //when RalphMan is in ghostEatingMode, count down the ghostEatingModeCounter to reset ghostEatingMode to false when the counter is 0
-        if (ralphManModel.isGhostEatingMode()) {
-            ghostEatingModeCounter--;
         }
         if (ghostEatingModeCounter == 0 && ralphManModel.isGhostEatingMode()) {
             ralphManModel.setGhostEatingMode(false);

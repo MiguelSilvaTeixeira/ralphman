@@ -71,62 +71,87 @@ public class RalphManView extends Group {
      */
     public void update(RalphManModel model) {
         assert model.getRowCount() == this.rowCount && model.getColumnCount() == this.columnCount;
-        //para cada ImageView, defina a imagem para corresponder ao CellValue daquela célula
-        for (int row = 0; row < this.rowCount; row++){
-            for (int column = 0; column < this.columnCount; column++){
+
+        for (int row = 0; row < this.rowCount; row++) {
+            for (int column = 0; column < this.columnCount; column++) {
+
                 CellValue value = model.getCellValue(row, column);
+
+                // 1️⃣ DESENHA O MAPA
                 if (value == CellValue.WALL) {
                     this.cellViews[row][column].setImage(this.wallImage);
-                }
-                else if (value == CellValue.BIGDOT) {
+
+                } else if (value == CellValue.BIGDOT) {
                     this.cellViews[row][column].setImage(this.bigDotImage);
-                }
-                else if (value == CellValue.SMALLDOT) {
+
+                } else if (value == CellValue.SMALLDOT) {
                     this.cellViews[row][column].setImage(this.smallDotImage);
-                }
-                else {
+
+                } else {
                     this.cellViews[row][column].setImage(null);
                 }
-                // Desenho do Ralph
-                if (row == model.getRalphmanLocation().getX() && column == model.getRalphmanLocation().getY()) {
-                    Image ralphImage;
-                    if (model.justAteBigDot()) {
-                        ralphImage = this.ralphmanPowerImage;
-                    } else {
-                        if (RalphManModel.getLastDirection() == RalphManModel.Direction.RIGHT || RalphManModel.getLastDirection() == RalphManModel.Direction.NONE) {
-                            ralphImage = this.ralphmanRightImage;
-                        } else if (RalphManModel.getLastDirection() == RalphManModel.Direction.LEFT) {
-                            ralphImage = this.ralphmanLeftImage;
-                        } else if (RalphManModel.getLastDirection() == RalphManModel.Direction.UP) {
-                            ralphImage = this.ralphmanUpImage;
-                        } else {
-                            ralphImage = this.ralphmanDownImage;
-                        }
-                    }
-                    this.cellViews[row][column].setImage(ralphImage);
-                    this.cellViews[row][column].setFitWidth(CELL_WIDTH);
-                    this.cellViews[row][column].setFitHeight(CELL_WIDTH);
-                }
-                //exiba fantasmas azuis no modo de comer fantasmas
+
+                // 2️⃣ DESENHA FANTASMAS
                 if (RalphManModel.isGhostEatingMode()) {
-                    if (row == model.getGhost1Location().getX() && column == model.getGhost1Location().getY()) {
+
+                    if (row == model.getGhost1Location().getX() &&
+                            column == model.getGhost1Location().getY()) {
+
                         this.cellViews[row][column].setImage(this.blueGhostImage);
                     }
-                    if (row == model.getGhost2Location().getX() && column == model.getGhost2Location().getY()) {
+
+                    if (row == model.getGhost2Location().getX() &&
+                            column == model.getGhost2Location().getY()) {
+
                         this.cellViews[row][column].setImage(this.blueGhostImage);
                     }
-                }
-                //exiba imagens de fantasmas normais caso contrário
-                else {
-                    if (row == model.getGhost1Location().getX() && column == model.getGhost1Location().getY()) {
+
+                } else {
+
+                    if (row == model.getGhost1Location().getX() &&
+                            column == model.getGhost1Location().getY()) {
+
                         this.cellViews[row][column].setImage(this.ghost1Image);
                     }
-                    if (row == model.getGhost2Location().getX() && column == model.getGhost2Location().getY()) {
+
+                    if (row == model.getGhost2Location().getX() &&
+                            column == model.getGhost2Location().getY()) {
+
                         this.cellViews[row][column].setImage(this.ghost2Image);
                     }
                 }
             }
         }
+
+        // 3️⃣ DESENHA O RALPH POR ÚLTIMO (SEMPRE VISÍVEL)
+        int ralphRow = (int) model.getRalphmanLocation().getX();
+        int ralphCol = (int) model.getRalphmanLocation().getY();
+
+        Image ralphImage;
+
+        if (RalphManModel.isGhostEatingMode()) {
+            ralphImage = this.ralphmanPowerImage;
+
+        } else {
+            if (RalphManModel.getLastDirection() == RalphManModel.Direction.RIGHT ||
+                    RalphManModel.getLastDirection() == RalphManModel.Direction.NONE) {
+
+                ralphImage = this.ralphmanRightImage;
+
+            } else if (RalphManModel.getLastDirection() == RalphManModel.Direction.LEFT) {
+                ralphImage = this.ralphmanLeftImage;
+
+            } else if (RalphManModel.getLastDirection() == RalphManModel.Direction.UP) {
+                ralphImage = this.ralphmanUpImage;
+
+            } else {
+                ralphImage = this.ralphmanDownImage;
+            }
+        }
+
+        this.cellViews[ralphRow][ralphCol].setImage(ralphImage);
+        this.cellViews[ralphRow][ralphCol].setFitWidth(CELL_WIDTH);
+        this.cellViews[ralphRow][ralphCol].setFitHeight(CELL_WIDTH);
     }
 
     public int getRowCount() {
