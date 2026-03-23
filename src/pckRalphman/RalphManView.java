@@ -1,5 +1,5 @@
 /**
- * Incorpora as várias Visões da aplicação que fazem referência a diferentes partes do Model, incluindo o tabuleiro principal do jogo, o rótulo de pontuação, o rótulo de nível, e o rótulo de Game Over.
+ * Agrupa as visões do jogo: tabuleiro, pontuação, nível e tela de fim de jogo
  */
 
 package pckRalphman;
@@ -28,9 +28,7 @@ public class RalphManView extends Group {
     private Image smallDotImage;
     private Image ralphmanPowerImage;
 
-    /**
-     * Inicializa os valores das variáveis de instância de imagem a partir de arquivos
-     */
+    /** Carrega imagens usadas na view */
     public RalphManView() {
         this.ralphmanRightImage = new Image(getClass().getResourceAsStream("/res/detonaralphRight.gif"));
         this.ralphmanUpImage = new Image(getClass().getResourceAsStream("/res/detonaralphUp.png"));
@@ -45,9 +43,7 @@ public class RalphManView extends Group {
         this.ralphmanPowerImage = new Image(getClass().getResourceAsStream("/res/detonaralphPower.gif"));
     }
 
-    /**
-     * Constrói uma grade vazia de ImageViews
-     */
+    /** Cria a grade de ImageViews */
     private void initializeGrid() {
         if (this.rowCount > 0 && this.columnCount > 0) {
             this.cellViews = new ImageView[this.rowCount][this.columnCount];
@@ -65,10 +61,7 @@ public class RalphManView extends Group {
         }
     }
 
-    /** Atualiza a visão para refletir o estado do modelo
-     *
-     * @param model
-     */
+    /** Atualiza a view a partir do modelo */
     public void update(RalphManModel model) {
         assert model.getRowCount() == this.rowCount && model.getColumnCount() == this.columnCount;
 
@@ -77,7 +70,7 @@ public class RalphManView extends Group {
 
                 CellValue value = model.getCellValue(row, column);
 
-                // 1️⃣ DESENHA O MAPA
+                // Desenha o mapa
                 if (value == CellValue.WALL) {
                     this.cellViews[row][column].setImage(this.wallImage);
 
@@ -91,7 +84,7 @@ public class RalphManView extends Group {
                     this.cellViews[row][column].setImage(null);
                 }
 
-                // 2️⃣ DESENHA FANTASMAS
+                // Desenha fantasmas
                 if (RalphManModel.isGhostEatingMode()) {
 
                     if (row == model.getGhost1Location().getX() &&
@@ -123,7 +116,7 @@ public class RalphManView extends Group {
             }
         }
 
-        // 3️⃣ DESENHA O RALPH POR ÚLTIMO (SEMPRE VISÍVEL)
+        // Desenha o Ralph por último
         int ralphRow = (int) model.getRalphmanLocation().getX();
         int ralphCol = (int) model.getRalphmanLocation().getY();
 
