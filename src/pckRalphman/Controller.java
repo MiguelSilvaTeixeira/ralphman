@@ -75,7 +75,7 @@ public class Controller implements EventHandler<KeyEvent> {
 
                 this.ralphManModel.step(direction);
 
-                // ✅ mover o contador pra cá
+                // mover o contador pra cá
                 if (ralphManModel.isGhostEatingMode()) {
                     ghostEatingModeCounter--;
                 }

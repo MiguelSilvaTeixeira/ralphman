@@ -1,6 +1,5 @@
 /**
- * O Model armazena informações sobre o estado do jogo, incluindo a grade subjacente de CellValues (conforme carregado do
- * arquivo de texto), vários indicadores booleanos sobre o estado do jogo, nível, pontuação, e o movimento do Ralph e fantasmas.
+ * Modelo que guarda o estado do jogo: grade, nível, pontuação e posições/velocidades
  */
 
 package pckRalphman;
@@ -40,18 +39,15 @@ public class RalphManModel {
     private static Direction currentDirection;
 
     /**
-     * Inicia um novo jogo na inicialização
+     * Inicia um novo jogo ao criar o modelo
      */
     public RalphManModel() {
         this.startNewGame();
     }
 
     /**
-     * Configura os CellValues da grade baseado no arquivo txt e coloca RalphMan e fantasmas em suas localizações iniciais.
-     * "W" indica uma parede, "E" indica um quadrado vazio, "B" indica um ponto grande, "S" indica
-     * um ponto pequeno, "1" ou "2" indica a casa dos fantasmas, e "P" indica a posição inicial do Ralph.
-     *
-     * @param fileName arquivo txt contendo a configuração do tabuleiro
+     * Lê o arquivo do nível e preenche a grade; também define posições iniciais
+     * W = parede, E = vazio, B = ponto grande, S = ponto pequeno, 1/2 = posição do fantasma, P = Ralph
      */
     public void initializeLevel(String fileName) {
         File file = new File(fileName);
@@ -137,8 +133,7 @@ public class RalphManModel {
         lastDirection = Direction.NONE;
     }
 
-    /** Inicializa valores das variáveis de instância e inicializa o mapa do nível
-     */
+    /** Inicializa variáveis e carrega o nível inicial */
     public void startNewGame() {
         this.gameOver = false;
         this.youWon = false;
@@ -153,9 +148,7 @@ public class RalphManModel {
         this.initializeLevel(Controller.getLevelFile(0));
     }
 
-    /** Inicializa o mapa do nível para o próximo nível
-     *
-     */
+    /** Inicia o próximo nível se o atual estiver completo */
     public void startNextLevel() {
         if (this.isLevelComplete()) {
             this.level++;
@@ -168,7 +161,7 @@ public class RalphManModel {
                 this.initializeLevel(Controller.getLevelFile(level - 1));
             }
             catch (ArrayIndexOutOfBoundsException e) {
-                //if there are no levels left in the level array, the game ends
+                // se não houver mais níveis, termina o jogo
                 youWon = true;
                 gameOver = true;
                 level--;
@@ -177,27 +170,26 @@ public class RalphManModel {
     }
 
     /**
-     * Move o Ralph baseado na direção indicada pelo usuário (baseado na entrada de teclado do Controller)
-     * @param direction a direção mais recentemente inserida para o Ralph se mover
+     * Move o RalphMan segundo a direção do jogador
+     * @param direction direção requisitada
      */
     public void moveRalphman(Direction direction) {
         Point2D potentialRalphmanVelocity = changeVelocity(direction);
         Point2D potentialRalphmanLocation = ralphmanLocation.add(potentialRalphmanVelocity);
-        //se o RalphMan sair da tela, dê a volta
+        // se sair da tela, faz o contorno
         potentialRalphmanLocation = setGoingOffscreenNewLocation(potentialRalphmanLocation);
-        //determine se o RalphMan deve mudar de direção ou continuar na direção mais recente
-        //se a entrada de direção mais recente for a mesma que a entrada anterior, verifique paredes
+        // decide mudar de direção ou continuar
         if (direction.equals(lastDirection)) {
-            //se mover na mesma direção resultaria em bater em uma parede, pare de se mover ou destrua a parede se estiver no modo de comer fantasmas
+            // se a nova posição for uma parede
             if (grid[(int) potentialRalphmanLocation.getX()][(int) potentialRalphmanLocation.getY()] == CellValue.WALL){
 
                 if (ghostEatingMode) {
-                    // SEMPRE quebra a parede
+                    // quebra a parede
                     grid[(int) potentialRalphmanLocation.getX()][(int) potentialRalphmanLocation.getY()] = CellValue.EMPTY;
 
                     ralphmanVelocity = potentialRalphmanVelocity;
                     ralphmanLocation = potentialRalphmanLocation;
-                    setLastDirection(direction); // 🔥 IMPORTANTE
+                    setLastDirection(direction); // importante
 
                 } else {
                     ralphmanVelocity = changeVelocity(Direction.NONE);
@@ -209,9 +201,9 @@ public class RalphManModel {
                 ralphmanLocation = potentialRalphmanLocation;
             }
         }
-        //se a entrada de direção mais recente não for a mesma que a entrada anterior, verifique paredes e cantos antes de ir em uma nova direção
+        // se direção nova for diferente da anterior, verifica paredes e cantos
         else {
-            //se o RalphMan bateria em uma parede com a nova entrada de direção, verifique se ele não bateria em uma parede diferente se continuasse na direção anterior
+            // se a nova direção bate em parede, tenta manter a anterior
             if (grid[(int) potentialRalphmanLocation.getX()][(int) potentialRalphmanLocation.getY()] == CellValue.WALL){
                 if (ghostEatingMode) {
                     grid[(int) potentialRalphmanLocation.getX()][(int) potentialRalphmanLocation.getY()] = CellValue.EMPTY;
@@ -222,7 +214,7 @@ public class RalphManModel {
                     potentialRalphmanVelocity = changeVelocity(lastDirection);
                     potentialRalphmanLocation = ralphmanLocation.add(potentialRalphmanVelocity);
                     potentialRalphmanLocation = setGoingOffscreenNewLocation(potentialRalphmanLocation);
-                    //if changing direction would hit another wall, stop moving
+                    // se ainda bater em parede, para
                     if (grid[(int) potentialRalphmanLocation.getX()][(int) potentialRalphmanLocation.getY()] == CellValue.WALL){
                         ralphmanVelocity = changeVelocity(Direction.NONE);
                         setLastDirection(Direction.NONE);
@@ -233,7 +225,7 @@ public class RalphManModel {
                     }
                 }
             }
-            //otherwise, change direction and keep moving
+            // caso contrário, muda de direção e anda
             else {
                 ralphmanVelocity = potentialRalphmanVelocity;
                 ralphmanLocation = potentialRalphmanLocation;
@@ -242,9 +234,7 @@ public class RalphManModel {
         }
     }
 
-    /**
-     * Move os fantasmas para seguir o RalphMan conforme estabelecido no método moveAGhost()
-     */
+    /** Move os dois fantasmas */
     public void moveGhosts() {
         Point2D[] ghost1Data = moveAGhost(ghost1Velocity, ghost1Location);
         Point2D[] ghost2Data = moveAGhost(ghost2Velocity, ghost2Location);
@@ -256,18 +246,16 @@ public class RalphManModel {
     }
 
     /**
-     * Move um fantasma para seguir o RalphMan se ele estiver na mesma linha ou coluna, ou se afastar do RalphMan se estiver no modo de comer fantasmas, caso contrário, mova-se aleatoriamente quando bater em uma parede.
-     * @param velocity a velocidade atual do fantasma especificado
-     * @param location a localização atual do fantasma especificado
-     * @return um array de Point2Ds contendo uma nova velocidade e localização para o fantasma
+     * Move um fantasma: persegue o RalphMan em mesma linha/coluna ou anda aleatoriamente ao bater em parede
+     * @param velocity velocidade atual
+     * @param location posição atual
+     * @return array com nova velocidade e posição
      */
     public Point2D[] moveAGhost(Point2D velocity, Point2D location){
         Random generator = new Random();
-        //se o fantasma estiver na mesma linha ou coluna que o RalphMan e não estiver no modo de comer fantasmas,
-        // vá na direção dele até bater em uma parede, então vá em uma direção diferente
-        //caso contrário, vá em uma direção aleatória, e se bater em uma parede vá em uma direção aleatória diferente
+        // se não estiver no modo de comer fantasmas, persegue RalphMan quando alinhado
         if (!ghostEatingMode) {
-            //verifique se o fantasma está na coluna do RalphMan e mova-se em direção a ele
+            // mesmo coluna: mover verticalmente em direção ao RalphMan
             if (location.getY() == ralphmanLocation.getY()) {
                 if (location.getX() > ralphmanLocation.getX()) {
                     velocity = changeVelocity(Direction.UP);
@@ -275,9 +263,9 @@ public class RalphManModel {
                     velocity = changeVelocity(Direction.DOWN);
                 }
                 Point2D potentialLocation = location.add(velocity);
-                //se o fantasma sair da tela, dê a volta
+                // contorna se sair da tela
                 potentialLocation = setGoingOffscreenNewLocation(potentialLocation);
-                //gere novas direções aleatórias até que o fantasma possa se mover sem bater em uma parede
+                // escolhe direções aleatórias até não bater em parede
                 while (grid[(int) potentialLocation.getX()][(int) potentialLocation.getY()] == CellValue.WALL) {
                     int randomNum = generator.nextInt(4);
                     Direction direction = intToDirection(randomNum);
@@ -287,7 +275,7 @@ public class RalphManModel {
                 }
                 location = potentialLocation;
             }
-            //verifique se o fantasma está na linha do RalphMan e mova-se em direção a ele
+            // mesma linha: mover horizontalmente em direção ao RalphMan
             else if (location.getX() == ralphmanLocation.getX()) {
                 if (location.getY() > ralphmanLocation.getY()) {
                     velocity = changeVelocity(Direction.LEFT);
@@ -305,7 +293,7 @@ public class RalphManModel {
                 }
                 location = potentialLocation;
             }
-            //mova-se em uma direção aleatória consistente até bater em uma parede, então escolha uma nova direção aleatória
+            // caso geral: segue a velocidade atual até bater em parede, então escolhe nova direção
             else{
                 Point2D potentialLocation = location.add(velocity);
                 potentialLocation = setGoingOffscreenNewLocation(potentialLocation);
@@ -319,9 +307,7 @@ public class RalphManModel {
                 location = potentialLocation;
             }
         }
-        //se o fantasma estiver na mesma linha ou coluna que o RalphMan e no modo de comer fantasmas, vá na direção oposta
-        // até bater em uma parede, então vá em uma direção diferente
-        //caso contrário, vá em uma direção aleatória, e se bater em uma parede vá em uma direção aleatória diferente
+        // se estiver no modo de comer fantasmas, afasta-se do RalphMan quando alinhado
         if (ghostEatingMode) {
             if (location.getY() == ralphmanLocation.getY()) {
                 if (location.getX() > ralphmanLocation.getX()) {
@@ -376,34 +362,35 @@ public class RalphManModel {
 
 
     /**
-     * Envolve o tabuleiro do jogo se a localização do objeto estiver fora da tela
-     * @param objectLocation a localização do objeto especificado
-     * @return Point2D nova localização envolvida
+     * Envolve a posição se estiver fora dos limites da grade
+     * @param objectLocation posição do objeto
+     * @return nova posição dentro dos limites
      */
     public Point2D setGoingOffscreenNewLocation(Point2D objectLocation) {
-        //se o objeto sair da tela à direita
+        // saiu à direita
         if (objectLocation.getY() >= columnCount) {
             objectLocation = new Point2D(objectLocation.getX(), 0);
         }
-        //se o objeto sair da tela à esquerda
+        // saiu à esquerda
         if (objectLocation.getY() < 0) {
             objectLocation = new Point2D(objectLocation.getX(), columnCount - 1);
         }
-        //se o objeto sair da tela na parte inferior
+        // saiu embaixo
         if (objectLocation.getX() >= rowCount) {
             objectLocation = new Point2D(0, objectLocation.getY());
         }
-        //se o objeto sair da tela na parte superior
+        // saiu em cima
         if (objectLocation.getX() < 0) {
             objectLocation = new Point2D(rowCount - 1, objectLocation.getY());
         }
         return objectLocation;
     }
 
+
     /**
-     * Conecta cada Direction a um inteiro de 0-3
-     * @param x um inteiro
-     * @return a Direction correspondente
+     * Converte inteiro 0-3 em Direction
+     * @param x inteiro
+     * @return direção
      */
     public Direction intToDirection(int x){
         if (x == 0){
@@ -420,9 +407,7 @@ public class RalphManModel {
         }
     }
 
-    /**
-     * Redefine a localização e velocidade do ghost1 para seu estado inicial
-     */
+    /** Redefine fantasma 1 para sua casa */
     public void sendGhost1Home() {
         for (int row = 0; row < this.rowCount; row++) {
             for (int column = 0; column < this.columnCount; column++) {
@@ -434,9 +419,7 @@ public class RalphManModel {
         ghost1Velocity = new Point2D(-1, 0);
     }
 
-    /**
-     * Redefine a localização e velocidade do ghost2 para seu estado inicial
-     */
+    /** Redefine fantasma 2 para sua casa */
     public void sendGhost2Home() {
         for (int row = 0; row < this.rowCount; row++) {
             for (int column = 0; column < this.columnCount; column++) {
@@ -449,25 +432,24 @@ public class RalphManModel {
     }
 
     /**
-     * Atualiza o modelo para refletir o movimento do RalphMan e dos fantasmas e a mudança de estado de quaisquer objetos comidos
-     * durante esses movimentos. Alterna o estado do jogo para ou do modo de comer fantasmas.
-     * @param direction a direção mais recentemente inserida para o RalphMan se mover
+     * Atualiza o estado do jogo por um passo: move Ralph, atualiza pontos e fantasmas
+     * @param direction direção do jogador
      */
     public void step(Direction direction) {
         this.moveRalphman(direction);
-        // Garanta que o RalphMan esteja dentro dos limites
+        // garante limites
         if (ralphmanLocation.getX() < 0) ralphmanLocation = new Point2D(rowCount - 1, ralphmanLocation.getY());
         if (ralphmanLocation.getX() >= rowCount) ralphmanLocation = new Point2D(0, ralphmanLocation.getY());
         if (ralphmanLocation.getY() < 0) ralphmanLocation = new Point2D(ralphmanLocation.getX(), columnCount - 1);
         if (ralphmanLocation.getY() >= columnCount) ralphmanLocation = new Point2D(ralphmanLocation.getX(), 0);
-        //se o RalphMan estiver em um ponto pequeno, delete o ponto pequeno
+        // se Ralph estiver em ponto pequeno, remove e soma pontos
         CellValue ralphmanLocationCellValue = grid[(int) ralphmanLocation.getX()][(int) ralphmanLocation.getY()];
         if (ralphmanLocationCellValue == CellValue.SMALLDOT) {
             grid[(int) ralphmanLocation.getX()][(int) ralphmanLocation.getY()] = CellValue.EMPTY;
             dotCount--;
             score += 10;
         }
-        //se o RalphMan estiver em um ponto grande, delete o ponto grande e mude o estado do jogo para o modo de comer fantasmas e inicialize o contador
+        // se Ralph estiver em ponto grande, ativa modo de comer fantasmas
         if (ralphmanLocationCellValue == CellValue.BIGDOT) {
             grid[(int) ralphmanLocation.getX()][(int) ralphmanLocation.getY()] = CellValue.EMPTY;
             dotCount--;
@@ -476,11 +458,11 @@ public class RalphManModel {
             ghostEatingMode = true;
             this.speedMultiplier = 1.25;
 
-            justAteBigDot = true; // ✅ ESSENCIAL
+            justAteBigDot = true; // essencial
 
             Controller.setGhostEatingModeCounter();
         }
-        //envie o fantasma de volta para a casa do fantasma se o RalphMan estiver em um fantasma no modo de comer fantasmas
+        // se no modo de comer fantasmas e Ralph encontrar um fantasma, manda o fantasma para casa
         if (ghostEatingMode) {
             if (ralphmanLocation.equals(ghost1Location)) {
                 sendGhost1Home();
@@ -491,7 +473,7 @@ public class RalphManModel {
                 score += 100;
             }
         }
-        //fim de jogo se o RalphMan for comido por um fantasma
+        // se não estiver no modo de comer fantasmas e Ralph encontrar um fantasma, fim de jogo
         else {
             if (ralphmanLocation.equals(ghost1Location)) {
                 gameOver = true;
@@ -502,7 +484,7 @@ public class RalphManModel {
                 ralphmanVelocity = new Point2D(0,0);
             }
         }
-        //mova os fantasmas e verifique novamente se os fantasmas ou o RalphMan são comidos (repetir essas verificações ajuda a contabilizar números pares/ímpares de quadrados entre fantasmas e RalphMan)
+        // move fantasmas e verifica novamente colisões
         this.moveGhosts();
         if (ghostEatingMode) {
             if (ralphmanLocation.equals(ghost1Location)) {
@@ -524,7 +506,7 @@ public class RalphManModel {
                 ralphmanVelocity = new Point2D(0,0);
             }
         }
-        //inicie um novo nível se o nível estiver completo
+        // inicia próximo nível se atual estiver completo
         if (this.isLevelComplete()) {
             ralphmanVelocity = new Point2D(0,0);
             startNextLevel();
@@ -532,9 +514,10 @@ public class RalphManModel {
     }
 
     /**
-     * Conecta cada direção a vetores de velocidade Point2D (Esquerda = (-1,0), Direita = (1,0), Cima = (0,-1), Baixo = (0,1))
-     * @param direction
-     * @return vetor de velocidade Point2D
+     * Converte direção para vetor de velocidade:
+     * Esquerda=(0,-1) Direita=(0,1) Cima=(-1,0) Baixo=(1,0)
+     * @param direction direção
+     * @return vetor de velocidade
      */
     public Point2D changeVelocity(Direction direction){
         if(direction == Direction.LEFT){
@@ -575,7 +558,7 @@ public class RalphManModel {
     }
 
     /**
-     * Quando todos os pontos são comidos, o nível está completo
+     * Retorna true quando não há mais pontos no nível
      * @return boolean
      */
     public boolean isLevelComplete() {
@@ -591,9 +574,10 @@ public class RalphManModel {
     }
 
     /**
-     * @param row
-     * @param column
-     * @return o Valor da Célula da célula (linha, coluna)
+     * Retorna o valor da célula (linha, coluna)
+     * @param row linha
+     * @param column coluna
+     * @return valor da célula
      */
     public CellValue getCellValue(int row, int column) {
         assert row >= 0 && row < this.grid.length && column >= 0 && column < this.grid[0].length;
@@ -624,10 +608,7 @@ public class RalphManModel {
         this.score = score;
     }
 
-    /** Adicione novos pontos à pontuação
-     *
-     * @param points
-     */
+    /** Adiciona pontos à pontuação */
     public void addToScore(int points) {
         this.score += points;
     }
@@ -640,9 +621,7 @@ public class RalphManModel {
         this.level = level;
     }
 
-    /**
-     * @return o número total de pontos restantes (grandes e pequenos)
-     */
+    /** Retorna o número de pontos restantes */
     public int getDotCount() {
         return dotCount;
     }
