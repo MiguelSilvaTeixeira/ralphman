@@ -24,6 +24,8 @@ public class RalphManView extends Group {
     private Image ghost2Image;
     private Image blueGhostImage;
     private Image wallImage;
+    private Image wallGreenImage;
+    private Image wallYellowImage;
     private Image bigDotImage;
     private Image smallDotImage;
     private Image ralphmanPowerImage;
@@ -37,7 +39,10 @@ public class RalphManView extends Group {
         this.ghost1Image = new Image(getClass().getResourceAsStream("/res/redghost.gif"));
         this.ghost2Image = new Image(getClass().getResourceAsStream("/res/ghost2.gif"));
         this.blueGhostImage = new Image(getClass().getResourceAsStream("/res/blueghost.gif"));
+        // imagens de parede por nível: primeiro wall, depois wallGreen, depois wallYellow
         this.wallImage = new Image(getClass().getResourceAsStream("/res/wall.png"));
+        this.wallGreenImage = new Image(getClass().getResourceAsStream("/res/wallGreen.png"));
+        this.wallYellowImage = new Image(getClass().getResourceAsStream("/res/wallYellow.png"));
         this.bigDotImage = new Image(getClass().getResourceAsStream("/res/whitedot.png"));
         this.smallDotImage = new Image(getClass().getResourceAsStream("/res/smalldot.png"));
         this.ralphmanPowerImage = new Image(getClass().getResourceAsStream("/res/detonaralphPower.gif"));
@@ -65,6 +70,10 @@ public class RalphManView extends Group {
     public void update(RalphManModel model) {
         assert model.getRowCount() == this.rowCount && model.getColumnCount() == this.columnCount;
 
+        // escolhe imagem de parede por nível em ciclo: 1->wall, 2->wallGreen, 3->wallYellow, depois repete
+        Image[] wallImages = new Image[] { this.wallImage, this.wallGreenImage, this.wallYellowImage };
+        Image wallToUse = wallImages[(Math.max(1, model.getLevel()) - 1) % wallImages.length];
+
         for (int row = 0; row < this.rowCount; row++) {
             for (int column = 0; column < this.columnCount; column++) {
 
@@ -72,7 +81,7 @@ public class RalphManView extends Group {
 
                 // Desenha o mapa
                 if (value == CellValue.WALL) {
-                    this.cellViews[row][column].setImage(this.wallImage);
+                    this.cellViews[row][column].setImage(wallToUse);
 
                 } else if (value == CellValue.BIGDOT) {
                     this.cellViews[row][column].setImage(this.bigDotImage);
