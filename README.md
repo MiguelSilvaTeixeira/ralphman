@@ -159,10 +159,6 @@ Isso compila o código, baixa as dependências JavaFX automaticamente e executa 
 - **W/A/S/D** ou **setas direcionais**: Mover o Ralph.
 - **G**: Reiniciar o jogo.
 
-## Controles
-- **W/A/S/D** ou **setas direcionais**: Mover o Ralph.
-- **G**: Reiniciar o jogo.
-
 ## Funcionalidades Especiais
 - Comer pontos grandes (brancos) ativa o modo poder: Ralph cresce, acelera, mostra GIF especial e pode destruir paredes.
 - Evite os fantasmas; no modo poder, coma-os para pontos extras.
